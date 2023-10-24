@@ -13,6 +13,7 @@
 #include <init.h>
 #include <memalign.h>
 #include <mmc.h>
+#include <usb.h>
 #include <asm/gpio.h>
 #include <asm/arch/mbox.h>
 #include <asm/arch/msg.h>
@@ -24,6 +25,8 @@
 #endif
 #include <watchdog.h>
 #include <dm/pinctrl.h>
+#include <mach/sysmap.h>
+#include <usb/dwc2_udc.h>
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -475,6 +478,17 @@ static void get_board_revision(void)
 
 	printf("RPI %s (0x%x)\n", model->name, revision);
 }
+
+#if !CONFIG_IS_ENABLED(DM_USB_GADGET)
+static struct dwc2_plat_otg_data dwc_otg_data = {
+        .regs_otg = HSOTG_BASE_ADDR
+};
+
+int board_usb_init(int index, enum usb_init_type init)
+{
+        return dwc2_udc_probe(&dwc_otg_data);
+}
+#endif
 
 int board_init(void)
 {
